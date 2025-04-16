@@ -124,7 +124,7 @@ jobs:
 
     sonar-analyze:
         name: Sonar Analyze
-        if: github.event_name == 'pull_request' && (contains(github.event.pull_request.labels.*.name, 'frontend') || contains(github.event.pull_request.labels.*.name, 'backend'))
+        if: github.event_name == 'pull_request'
         runs-on: ubuntu-latest
         steps:
         - uses: actions/checkout@v4
