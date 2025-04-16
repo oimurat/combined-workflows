@@ -118,3 +118,20 @@ jobs:
               run: |
                   cd fastapi
                   pytest .
+
+    sonar-analyze:
+        name: Sonar Analyze
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/feature/')
+        runs-on: ubuntu-latest
+        steps:
+        - uses: actions/checkout@v4
+          with:
+            fetch-depth: 0
+        - name: SonarQube Scan
+          uses: SonarSource/sonarqube-scan-action@v5.0.0
+          with:
+            args: >
+                -Dsonar.projectKey=oimurat_combined-workflows
+                -Dsonar.organization=systena-dx
+          env:
+              SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
