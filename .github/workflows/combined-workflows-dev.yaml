@@ -37,7 +37,7 @@ jobs:
                       backend:
                         - 'fastapi/**/*.py'
 
-    frontend-format-lint-test:
+    frontend-format-lint-test: # フロントエンドのフォーマット、静的解析、テストを実施
         name: Frontend Format & Lint & Test
         needs: filter-files
         if: (github.event_name == 'push' && startsWith(github.ref, 'refs/heads/feature/') && needs.filter-files.outputs.frontend == 'true') || (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'frontend'))
