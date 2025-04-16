@@ -1,5 +1,5 @@
 function App() {
-    return <p>Vite</p>;
+    return <p>vite</p>;
 }
 
 export default App;
