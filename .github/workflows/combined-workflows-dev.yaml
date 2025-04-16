@@ -6,6 +6,8 @@ on:
         branches:
             - feature/*
             - develop
+        tags:
+            - dev-build-* # dev-build-で始まるタグがプッシュされたときにトリガー
     pull_request: # プルリクエストが発生したときにトリガー
         branches:
             - develop
