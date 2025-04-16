@@ -12,6 +12,14 @@ on:
         types:
             - opened
 
+# 環境変数の設定
+env:
+    OCI_CLI_USER: ${{ secrets.OCI_CLI_USER }}
+    OCI_CLI_TENANCY: ${{ secrets.OCI_CLI_TENANCY }}
+    OCI_CLI_FINGERPRINT: ${{ secrets.OCI_CLI_FINGERPRINT }}
+    OCI_CLI_KEY_CONTENT: ${{ secrets.OCI_CLI_KEY_CONTENT }}
+    OCI_CLI_REGION: ${{ secrets.OCI_CLI_REGION }}
+
 # ジョブの設定
 jobs:
     filter-files: # 変更されたファイルを判定
@@ -138,3 +146,65 @@ jobs:
                 -Dsonar.organization=systena-dx
           env:
               SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+    frontend-build-and-push: # フロントエンドのビルドとプッシュを行うジョブ
+        name: Frontend Build & Push
+        if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout repository # リポジトリをチェックアウト
+              uses: actions/checkout@v4
+
+            - name: Get latest tag
+              id: get_tag
+              run: |
+                git fetch --tags
+                TAG=$(git describe --tags --abbrev=0 || echo "none")
+                echo "Found tag: $TAG"
+                echo "tag=$TAG" >> $GITHUB_OUTPUT
+
+            - name: Docker build # Docker イメージをビルド
+              if: startsWith(steps.get_tag.outputs.tag, 'dev-build-')
+              run: docker build . --file react/Dockerfile --tag nrt.ocir.io/nrcmxxv7sjse/ec_service_test:nodejs-${{ github.sha }}
+
+            - name: Login OCIR # OCIR にログイン
+              if: startsWith(steps.get_tag.outputs.tag, 'dev-build-')
+              uses: oracle-actions/login-ocir@v1.3.0
+              with:
+                auth_token: ${{ secrets.OCI_AUTH_TOKEN }}
+
+            - name: Push container image # コンテナイメージを OCIR にプッシュ
+              if: startsWith(steps.get_tag.outputs.tag, 'dev-build-')
+              run: docker push nrt.ocir.io/nrcmxxv7sjse/ec_service_test:nodejs-${{ github.sha }}
+
+    backend-build-and-push: # バックエンドのビルドとプッシュを行うジョブ
+        name: Backend Build & Push
+        if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout repository # リポジトリをチェックアウト
+              uses: actions/checkout@v4
+
+            - name: Get latest tag
+              id: get_tag
+              run: |
+                git fetch --tags
+                TAG=$(git describe --tags --abbrev=0 || echo "none")
+                echo "Found tag: $TAG"
+                echo "tag=$TAG" >> $GITHUB_OUTPUT
+
+            - name: Docker build # Docker イメージをビルド
+              if: startsWith(steps.get_tag.outputs.tag, 'dev-build-')
+              run: docker build . --file fastapi/Dockerfile --tag nrt.ocir.io/nrcmxxv7sjse/ec_service_test:python-${{ github.sha }}
+
+            - name: Login OCIR # OCIR にログイン
+              if: startsWith(steps.get_tag.outputs.tag, 'dev-build-')
+              uses: oracle-actions/login-ocir@v1.3.0
+              with:
+                auth_token: ${{ secrets.OCI_AUTH_TOKEN }}
+
+            - name: Push container image # コンテナイメージを OCIR にプッシュ
+              if: startsWith(steps.get_tag.outputs.tag, 'dev-build-')
+              run: docker push nrt.ocir.io/nrcmxxv7sjse/ec_service_test:python-${{ github.sha }}
