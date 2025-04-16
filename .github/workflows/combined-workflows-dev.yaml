@@ -20,6 +20,9 @@ jobs:
             frontend: ${{ steps.filter.outputs.frontend }} # フロントエンド変更時
             backend: ${{ steps.filter.outputs.backend }} # バックエンド変更時
         steps:
+            - name: Checkout repository # リポジトリをチェックアウト
+              uses: actions/checkout@v4
+
             - name: Determine changed files # 変更されたファイルを判定
               id: filter
               uses: dorny/paths-filter@v3
