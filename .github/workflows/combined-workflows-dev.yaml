@@ -16,7 +16,7 @@ on:
 jobs:
     filter-files: # 変更されたファイルを判定
         name: Determine Changed Files
-        if: (github.event_name == 'push' && startsWith(github.ref, 'refs/heads/feature/')) || github.event_name == 'pull_request'
+        if: (github.event_name == 'push' && startsWith(github.ref, 'refs/heads/feature/')) || (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'frontend'))
         runs-on: ubuntu-latest
         outputs: # 判定結果を格納
             frontend: ${{ steps.filter.outputs.frontend }} # フロントエンド変更時
@@ -40,7 +40,7 @@ jobs:
     frontend-format-lint-test:
         name: Frontend Format & Lint & Test
         needs: filter-files
-        if: (github.event_name == 'push' && startsWith(github.ref, 'refs/heads/feature/') && needs.filter-files.outputs.frontend == 'true') || github.event_name == 'pull_request'
+        if: (github.event_name == 'push' && startsWith(github.ref, 'refs/heads/feature/') && needs.filter-files.outputs.frontend == 'true') || (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'frontend'))
         runs-on: ubuntu-latest
 
         steps:
@@ -81,7 +81,7 @@ jobs:
     backend-format-lint-test:
         name: Backend Format & Lint & Test
         needs: filter-files
-        if: (github.event_name == 'push' && startsWith(github.ref, 'refs/heads/feature/') && needs.filter-files.outputs.backend == 'true') || github.event_name == 'pull_request'
+        if: (github.event_name == 'push' && startsWith(github.ref, 'refs/heads/feature/') && needs.filter-files.outputs.backend == 'true') || (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'backend'))
         runs-on: ubuntu-latest
 
         steps:
@@ -124,7 +124,7 @@ jobs:
 
     sonar-analyze:
         name: Sonar Analyze
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && (contains(github.event.pull_request.labels.*.name, 'frontend') || contains(github.event.pull_request.labels.*.name, 'backend'))
         runs-on: ubuntu-latest
         steps:
         - uses: actions/checkout@v4
