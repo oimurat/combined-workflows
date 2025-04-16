@@ -11,6 +11,6 @@ describe('サンプルテスト', () => {
         render(<App />);
 
         // 検証
-        expect(screen.getByText('vite')).toBeInTheDocument();
+        expect(screen.getByText('Vite')).toBeInTheDocument();
     });
 });
