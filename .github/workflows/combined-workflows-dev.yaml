@@ -6,6 +6,8 @@ on:
         branches:
             - feature/*
             - develop
+        tags:
+            - dev-build-* # dev-build-で始まるタグがプッシュされたときにトリガー
     pull_request: # プルリクエストが発生したときにトリガー
         branches:
             - develop
@@ -149,62 +151,40 @@ jobs:
 
     frontend-build-and-push: # フロントエンドのビルドとプッシュを行うジョブ
         name: Frontend Build & Push
-        if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+        if: startsWith(github.ref, 'refs/tags/dev-build-')
         runs-on: ubuntu-latest
 
         steps:
             - name: Checkout repository # リポジトリをチェックアウト
               uses: actions/checkout@v4
 
-            - name: Get latest tag
-              id: get_tag
-              run: |
-                git fetch --tags
-                TAG=$(git describe --tags --abbrev=0 || echo "none")
-                echo "Found tag: $TAG"
-                echo "tag=$TAG" >> $GITHUB_OUTPUT
-
             - name: Docker build # Docker イメージをビルド
-              if: startsWith(steps.get_tag.outputs.tag, 'dev-build-')
               run: docker build . --file react/Dockerfile --tag nrt.ocir.io/nrcmxxv7sjse/ec_service_test:nodejs-${{ github.sha }}
 
             - name: Login OCIR # OCIR にログイン
-              if: startsWith(steps.get_tag.outputs.tag, 'dev-build-')
               uses: oracle-actions/login-ocir@v1.3.0
               with:
                 auth_token: ${{ secrets.OCI_AUTH_TOKEN }}
 
             - name: Push container image # コンテナイメージを OCIR にプッシュ
-              if: startsWith(steps.get_tag.outputs.tag, 'dev-build-')
               run: docker push nrt.ocir.io/nrcmxxv7sjse/ec_service_test:nodejs-${{ github.sha }}
 
     backend-build-and-push: # バックエンドのビルドとプッシュを行うジョブ
         name: Backend Build & Push
-        if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+        if: startsWith(github.ref, 'refs/tags/dev-build-')
         runs-on: ubuntu-latest
 
         steps:
             - name: Checkout repository # リポジトリをチェックアウト
               uses: actions/checkout@v4
 
-            - name: Get latest tag
-              id: get_tag
-              run: |
-                git fetch --tags
-                TAG=$(git describe --tags --abbrev=0 || echo "none")
-                echo "Found tag: $TAG"
-                echo "tag=$TAG" >> $GITHUB_OUTPUT
-
             - name: Docker build # Docker イメージをビルド
-              if: startsWith(steps.get_tag.outputs.tag, 'dev-build-')
               run: docker build . --file fastapi/Dockerfile --tag nrt.ocir.io/nrcmxxv7sjse/ec_service_test:python-${{ github.sha }}
 
             - name: Login OCIR # OCIR にログイン
-              if: startsWith(steps.get_tag.outputs.tag, 'dev-build-')
               uses: oracle-actions/login-ocir@v1.3.0
               with:
                 auth_token: ${{ secrets.OCI_AUTH_TOKEN }}
 
             - name: Push container image # コンテナイメージを OCIR にプッシュ
-              if: startsWith(steps.get_tag.outputs.tag, 'dev-build-')
               run: docker push nrt.ocir.io/nrcmxxv7sjse/ec_service_test:python-${{ github.sha }}
