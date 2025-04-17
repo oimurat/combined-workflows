@@ -6,6 +6,9 @@ on:
         branches:
             - release # releaseブランチにプッシュされたときにトリガー
 
+permissions:
+  contents: write
+
 env:
     OCI_CLI_USER: ${{ secrets.OCI_CLI_USER }}
     OCI_CLI_TENANCY: ${{ secrets.OCI_CLI_TENANCY }}
