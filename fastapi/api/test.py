@@ -1,1 +1,1 @@
-print("stg_test")
+print("stgTest")
