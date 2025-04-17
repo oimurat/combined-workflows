@@ -6,6 +6,9 @@ on:
         branches:
             - release # releaseブランチにプッシュされたときにトリガー
 
+permissions:
+  contents: write
+
 env:
     OCI_CLI_USER: ${{ secrets.OCI_CLI_USER }}
     OCI_CLI_TENANCY: ${{ secrets.OCI_CLI_TENANCY }}
@@ -24,6 +27,26 @@ jobs:
             id: set-tag
             run: echo "date_tag=stg-$(date +%Y%m%d-%H%M%S)" >> $GITHUB_OUTPUT
 
+    tag-commit:
+        name: Tag Commit
+        needs: set-date-tag
+        runs-on: ubuntu-latest
+        steps:
+          - name: Checkout
+            uses: actions/checkout@v4
+
+          - name: Set up Git
+            run: |
+              git config user.name "github-actions"
+              git config user.email "github-actions@github.com"
+
+          - name: Create and push tag
+            env:
+              DATE_TAG: ${{ needs.set-date-tag.outputs.date_tag }}
+            run: |
+              git tag $DATE_TAG
+              git push origin $DATE_TAG
+
     frontend-build-and-push: # フロントエンドのビルドとプッシュを行うジョブ
         name: Frontend Build & Push
         runs-on: ubuntu-latest
@@ -33,6 +56,8 @@ jobs:
         steps:
             - name: Checkout repository # リポジトリをチェックアウト
               uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0 # フルクローンする
 
             - name: Docker build # Docker イメージをビルド
               run: docker build . --file react/Dockerfile --tag nrt.ocir.io/nrcmxxv7sjse/ec_service_test:nodejs-$DATE_TAG
