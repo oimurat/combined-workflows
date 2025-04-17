@@ -1,10 +1,10 @@
-name: combined-workflows-stg # ワークフロー名を決定
+name: combined-workflows-main # ワークフロー名を決定
 
 # トリガーの設定
 on:
     push: # プッシュ(マージ)が発生したときにトリガー
         branches:
-            - release # releaseブランチにプッシュされたときにトリガー
+            - main # mainブランチにプッシュされたときにトリガー
 
 permissions:
     contents: write
@@ -53,6 +53,8 @@ jobs:
         steps:
             - name: Checkout
               uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0 # フルクローンする
 
             - name: Set up Git
               run: |
@@ -99,6 +101,8 @@ jobs:
         steps:
             - name: Checkout repository # リポジトリをチェックアウト
               uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0 # フルクローンする
 
             - name: Docker build # Docker イメージをビルド
               run: docker build . --file fastapi/Dockerfile --tag nrt.ocir.io/nrcmxxv7sjse/ec_service_test:python-$DATE_TAG
@@ -121,6 +125,8 @@ jobs:
         steps:
             - name: Checkout repository # リポジトリをチェックアウト
               uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0 # フルクローンする
 
             - name: create github app token # GitHub Appトークンの作成
               uses: actions/create-github-app-token@v1
