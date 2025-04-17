@@ -4,7 +4,7 @@ name: combined-workflows-stg # ワークフロー名を決定
 on:
     push: # プッシュ(マージ)が発生したときにトリガー
         branches:
-            - release/* # release/*ブランチにプッシュされたときにトリガー
+            - release/x.y.z # release/*ブランチにプッシュされたときにトリガー
 
 env:
     OCI_CLI_USER: ${{ secrets.OCI_CLI_USER }}
