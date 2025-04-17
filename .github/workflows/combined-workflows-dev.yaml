@@ -155,12 +155,14 @@ jobs:
         name: Frontend Build & Push
         if: startsWith(github.ref, 'refs/tags/dev-build-') # dev-build-で始まるタグがプッシュされたときに実行
         runs-on: ubuntu-latest
+        env:
+          VERSION_TAG: ${{ github.ref_name }}
         steps:
             - name: Checkout repository # リポジトリをチェックアウト
               uses: actions/checkout@v4
 
             - name: Docker build # Docker イメージをビルド
-              run: docker build . --file react/Dockerfile --tag nrt.ocir.io/nrcmxxv7sjse/ec_service_test:nodejs-${{ github.sha }}
+              run: docker build . --file react/Dockerfile --tag nrt.ocir.io/nrcmxxv7sjse/ec_service_test:nodejs-$VERSION_TAG
 
             - name: Login OCIR # OCIR にログイン
               uses: oracle-actions/login-ocir@v1.3.0
@@ -168,18 +170,20 @@ jobs:
                 auth_token: ${{ secrets.OCI_AUTH_TOKEN }}
 
             - name: Push container image # コンテナイメージを OCIR にプッシュ
-              run: docker push nrt.ocir.io/nrcmxxv7sjse/ec_service_test:nodejs-${{ github.sha }}
+              run: docker push nrt.ocir.io/nrcmxxv7sjse/ec_service_test:nodejs-$VERSION_TAG
 
     backend-build-and-push: # バックエンドのビルドとプッシュを実施
         name: Backend Build & Push
         if: startsWith(github.ref, 'refs/tags/dev-build-') # dev-build-で始まるタグがプッシュされたときに実行
         runs-on: ubuntu-latest
+        env:
+          VERSION_TAG: ${{ github.ref_name }}
         steps:
             - name: Checkout repository # リポジトリをチェックアウト
               uses: actions/checkout@v4
 
             - name: Docker build # Docker イメージをビルド
-              run: docker build . --file fastapi/Dockerfile --tag nrt.ocir.io/nrcmxxv7sjse/ec_service_test:python-${{ github.sha }}
+              run: docker build . --file fastapi/Dockerfile --tag nrt.ocir.io/nrcmxxv7sjse/ec_service_test:python-$VERSION_TAG
 
             - name: Login OCIR # OCIR にログイン
               uses: oracle-actions/login-ocir@v1.3.0
@@ -187,4 +191,4 @@ jobs:
                 auth_token: ${{ secrets.OCI_AUTH_TOKEN }}
 
             - name: Push container image # コンテナイメージを OCIR にプッシュ
-              run: docker push nrt.ocir.io/nrcmxxv7sjse/ec_service_test:python-${{ github.sha }}
+              run: docker push nrt.ocir.io/nrcmxxv7sjse/ec_service_test:python-$VERSION_TAG
