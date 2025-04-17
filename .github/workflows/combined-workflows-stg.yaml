@@ -78,7 +78,6 @@ jobs:
                   app-id: ${{ secrets.APP_ID }}
                   private-key: ${{ secrets.PRIVATE_KEY }}
                   owner: ${{ github.repository_owner }}
-                  repositories: combined-workflows
 
             - name: Repository Dispatch Manifest # マニュフェストリポジトリへの接続
               uses: peter-evans/repository-dispatch@v3
