@@ -1,0 +1,87 @@
+name: combined-workflows-stg # ワークフロー名を決定
+
+# トリガーの設定
+on:
+    push: # プッシュ(マージ)が発生したときにトリガー
+        branches:
+            - release/* # release/*ブランチにプッシュされたときにトリガー
+
+env:
+    OCI_CLI_USER: ${{ secrets.OCI_CLI_USER }}
+    OCI_CLI_TENANCY: ${{ secrets.OCI_CLI_TENANCY }}
+    OCI_CLI_FINGERPRINT: ${{ secrets.OCI_CLI_FINGERPRINT }}
+    OCI_CLI_KEY_CONTENT: ${{ secrets.OCI_CLI_KEY_CONTENT }}
+    OCI_CLI_REGION: ${{ secrets.OCI_CLI_REGION }}
+
+jobs:
+    frontend-build-and-push: # フロントエンドのビルドとプッシュを行うジョブ
+        name: Frontend Build & Push
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout repository # リポジトリをチェックアウト
+              uses: actions/checkout@v4
+
+            - name: Set Date Tag
+              run: echo "DATE_TAG=stg-$(date +%Y%m%d)" >> $GITHUB_ENV
+
+            - name: Docker build # Docker イメージをビルド
+              run: docker build . --file react/Dockerfile --tag nrt.ocir.io/nrcmxxv7sjse/ec_service_test:nodejs-${{ env.DATE_TAG }}
+
+            - name: Login OCIR # OCIR にログイン
+              uses: oracle-actions/login-ocir@v1.3.0
+              with:
+                  auth_token: ${{ secrets.OCI_AUTH_TOKEN }}
+
+            - name: Push container image # コンテナイメージを OCIR にプッシュ
+              run: docker push nrt.ocir.io/nrcmxxv7sjse/ec_service_test:nodejs-${{ env.DATE_TAG }}
+
+    backend-build-and-push: # バックエンドのビルドとプッシュを行うジョブ
+        name: Backend Build & Push
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout repository # リポジトリをチェックアウト
+              uses: actions/checkout@v4
+
+            - name: Set Date Tag
+              run: echo "DATE_TAG=stg-$(date +%Y%m%d)" >> $GITHUB_ENV
+
+            - name: Docker build # Docker イメージをビルド
+              run: docker build . --file fastapi/Dockerfile --tag nrt.ocir.io/nrcmxxv7sjse/ec_service_test:python-${{ env.DATE_TAG }}
+
+            - name: Login OCIR # OCIR にログイン
+              uses: oracle-actions/login-ocir@v1.3.0
+              with:
+                  auth_token: ${{ secrets.OCI_AUTH_TOKEN }}
+
+            - name: Push container image # コンテナイメージを OCIR にプッシュ
+              run: docker push nrt.ocir.io/nrcmxxv7sjse/ec_service_test:python-${{ env.DATE_TAG }}
+
+    dispatch:
+        name: Repository Dispatch # 他リポジトリへの接続を行うジョブ
+        needs: [frontend-build-and-push, backend-build-and-push]
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout repository # リポジトリをチェックアウト
+              uses: actions/checkout@v4
+
+            - name: Set Env # 環境変数の設定
+              run: |
+                  echo "DATE_TAG=stg-$(date +%Y%m%d)" >> $GITHUB_ENV
+
+            - name: create github app token # GitHub Appトークンの作成
+              uses: actions/create-github-app-token@v1
+              id: app-token
+              with:
+                  app-id: ${{ secrets.APP_ID }}
+                  private-key: ${{ secrets.PRIVATE_KEY }}
+
+            - name: Repository Dispatch Manifest # マニュフェストリポジトリへの接続
+              uses: peter-evans/repository-dispatch@v3
+              with:
+                  token: ${{ steps.app-token.outputs.token }}
+                  repository: oimurat/dispatch-test-githubapp # リポジトリ名を指定
+                  event-type: update-manifest-stg
+                  client-payload: '{"date": "${{ env.DATE_TAG }}"}'
