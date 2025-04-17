@@ -26,7 +26,7 @@ env:
 jobs:
     filter-files: # 変更されたファイルを判定
         name: Determine Changed Files
-        if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/feature/')
+        if: (github.event_name == 'push' && startsWith(github.ref, 'refs/heads/feature/')) || github.event_name == 'pull_request'
         runs-on: ubuntu-latest
         outputs: # 判定結果を格納
             frontend: ${{ steps.filter.outputs.frontend }} # フロントエンド変更時
