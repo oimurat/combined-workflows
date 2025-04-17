@@ -71,7 +71,7 @@ jobs:
     frontend-build-and-push: # フロントエンドのビルドとプッシュを行うジョブ
         name: Frontend Build & Push
         runs-on: ubuntu-latest
-        needs: set-date-tag
+        needs: set-version-tag
         env:
             VERSION_TAG: ${{ needs.set-version-tag.outputs.version_tag }}
         steps:
@@ -94,7 +94,7 @@ jobs:
     backend-build-and-push: # バックエンドのビルドとプッシュを行うジョブ
         name: Backend Build & Push
         runs-on: ubuntu-latest
-        needs: set-date-tag
+        needs: set-version-tag
         env:
             VERSION_TAG: ${{ needs.set-version-tag.outputs.version_tag }}
 
@@ -117,7 +117,7 @@ jobs:
 
     dispatch:
         name: Repository Dispatch # 他リポジトリへの接続を行うジョブ
-        needs: [set-date-tag, frontend-build-and-push, backend-build-and-push]
+        needs: [set-version-tag, frontend-build-and-push, backend-build-and-push]
         runs-on: ubuntu-latest
         env:
             VERSION_TAG: ${{ needs.set-version-tag.outputs.version_tag }}
