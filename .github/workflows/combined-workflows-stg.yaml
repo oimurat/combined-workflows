@@ -92,4 +92,4 @@ jobs:
                   token: ${{ steps.app-token.outputs.token }}
                   repository: oimurat/dispatch-test-githubapp # リポジトリ名を指定
                   event-type: update-manifest-stg
-                  client-payload: '{"date": "$DATE_TAG"}'
+                  client-payload: '{"date": "${{ env.DATE_TAG }}"}'
