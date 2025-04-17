@@ -50,7 +50,7 @@ jobs:
     frontend-format-lint-test: # フロントエンドのフォーマット、静的解析、テストを実施
         name: Frontend Format & Lint & Test
         needs: filter-files
-        if: (github.event_name == 'push' && startsWith(github.ref, 'refs/heads/feature/') && needs.filter-files.outputs.frontend == 'true') || (github.event.action == 'labeled' && contains(github.event.pull_request.labels.*.name, 'frontend'))
+        if: (github.event_name == 'push' && startsWith(github.ref, 'refs/heads/feature/') && needs.filter-files.outputs.frontend == 'true') || (github.event.action == 'opened' && contains(github.event.pull_request.labels.*.name, 'frontend'))
         runs-on: ubuntu-latest
 
         steps:
@@ -91,7 +91,7 @@ jobs:
     backend-format-lint-test:
         name: Backend Format & Lint & Test
         needs: filter-files
-        if: (github.event_name == 'push' && startsWith(github.ref, 'refs/heads/feature/') && needs.filter-files.outputs.backend == 'true') || (github.event.action == 'labeled' && contains(github.event.pull_request.labels.*.name, 'backend'))
+        if: (github.event_name == 'push' && startsWith(github.ref, 'refs/heads/feature/') && needs.filter-files.outputs.backend == 'true') || (github.event.action == 'opened' && contains(github.event.pull_request.labels.*.name, 'backend'))
         runs-on: ubuntu-latest
 
         steps:
