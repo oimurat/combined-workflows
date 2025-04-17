@@ -1,1 +1,1 @@
-print("stgTest")
+print("ステージング環境テスト")
