@@ -81,7 +81,7 @@ jobs:
                   fetch-depth: 0 # フルクローンする
 
             - name: Docker build # Docker イメージをビルド
-              run: docker build . --file react/Dockerfile --tag nrt.ocir.io/nrcmxxv7sjse/ec_service_test:nodejs-$DATE_TAG
+              run: docker build . --file react/Dockerfile --tag nrt.ocir.io/nrcmxxv7sjse/ec_service_test:nodejs-$VERSION_TAG
 
             - name: Login OCIR # OCIR にログイン
               uses: oracle-actions/login-ocir@v1.3.0
@@ -89,7 +89,7 @@ jobs:
                   auth_token: ${{ secrets.OCI_AUTH_TOKEN }}
 
             - name: Push container image # コンテナイメージを OCIR にプッシュ
-              run: docker push nrt.ocir.io/nrcmxxv7sjse/ec_service_test:nodejs-$DATE_TAG
+              run: docker push nrt.ocir.io/nrcmxxv7sjse/ec_service_test:nodejs-$VERSION_TAG
 
     backend-build-and-push: # バックエンドのビルドとプッシュを行うジョブ
         name: Backend Build & Push
@@ -105,7 +105,7 @@ jobs:
                   fetch-depth: 0 # フルクローンする
 
             - name: Docker build # Docker イメージをビルド
-              run: docker build . --file fastapi/Dockerfile --tag nrt.ocir.io/nrcmxxv7sjse/ec_service_test:python-$DATE_TAG
+              run: docker build . --file fastapi/Dockerfile --tag nrt.ocir.io/nrcmxxv7sjse/ec_service_test:python-$VERSION_TAG
 
             - name: Login OCIR # OCIR にログイン
               uses: oracle-actions/login-ocir@v1.3.0
@@ -113,7 +113,7 @@ jobs:
                   auth_token: ${{ secrets.OCI_AUTH_TOKEN }}
 
             - name: Push container image # コンテナイメージを OCIR にプッシュ
-              run: docker push nrt.ocir.io/nrcmxxv7sjse/ec_service_test:python-$DATE_TAG
+              run: docker push nrt.ocir.io/nrcmxxv7sjse/ec_service_test:python-$VERSION_TAG
 
     dispatch:
         name: Repository Dispatch # 他リポジトリへの接続を行うジョブ
@@ -141,5 +141,5 @@ jobs:
               with:
                   token: ${{ steps.app-token.outputs.token }}
                   repository: oimurat/dispatch-test-githubapp # リポジトリ名を指定
-                  event-type: update-manifest-stg
+                  event-type: update-manifest-main
                   client-payload: '{"date": "${{ env.VERSION_TAG }}"}'
