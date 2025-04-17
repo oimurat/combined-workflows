@@ -48,7 +48,7 @@ jobs:
 
     tag-commit:
         name: Tag Commit
-        needs: set-date-tag
+        needs: set-version-tag
         runs-on: ubuntu-latest
         steps:
             - name: Checkout
