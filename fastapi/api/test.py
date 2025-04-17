@@ -1,1 +1,1 @@
-print("stgTest")
+print("テスト")
